@@ -1,0 +1,10 @@
+//--------------------------------------------------
+// pRealm Configuration Block
+ProcessConfig = pRealm
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  // Track the history of the VISIT_POINT variable for RealmCasting
+  hist_var = VISIT_POINT
+}

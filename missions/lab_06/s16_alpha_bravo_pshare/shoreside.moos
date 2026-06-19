@@ -1,0 +1,76 @@
+//-------------------------------------------------
+// NAME: Shoreside Community
+// FILE: shoreside.moos
+//-------------------------------------------------
+
+ServerHost = localhost
+ServerPort = 9000
+Community  = shoreside
+
+// Forest Lake
+LatOrigin  = 43.825300 
+LongOrigin = -70.330400 
+
+// MIT Sailing Pavilion (use this one)
+// LatOrigin  = 42.358456 
+// LongOrigin = -71.087589
+
+//-------------------------------------------------
+// Antler configuration block
+ProcessConfig = ANTLER
+{
+  MSBetweenLaunches = 200
+
+  Run = MOOSDB          @ NewConsole = false
+  Run = pMarineViewer   @ NewConsole = false
+  Run = pShare          @ NewConsole = false
+}
+
+//-------------------------------------------------
+// pShare configuration block
+ProcessConfig = pShare
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  // Listen for incoming variables from the vehicle on port 9200
+  input = route = localhost:9200
+
+  // Route command variables down to the alpha (assumed listening on 9201)
+  output = src_name=DEPLOY, route=localhost:9201
+  output = src_name=RETURN, route=localhost:9201
+  output = src_name=MOOS_MANUAL_OVERIDE, route=localhost:9201
+
+  // Route command variables down to the bravo (assumed listening on 9201)
+  output = src_name=DEPLOY, route=localhost:9202
+  output = src_name=RETURN, route=localhost:9202
+  output = src_name=MOOS_MANUAL_OVERIDE, route=localhost:9202
+}
+
+//-------------------------------------------------
+// pMarineViewer configuration block
+ProcessConfig = pMarineViewer
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  tiff_file            = forrest19.tif
+
+  set_pan_x            = -90
+  set_pan_y            = -280
+  zoom                 = 0.65
+  vehicle_shape_scale  = 1.5
+  hash_delta           = 50
+  hash_shade           = 0.22
+  hash_viewable        = true
+
+  appcast_height       = 75
+  appcast_width        = 30
+  appcast_viewable     = true
+  appcast_color_scheme = indigo
+
+  // Command and Control Buttons
+  button_one = DEPLOY # DEPLOY=true 
+  button_one = MOOS_MANUAL_OVERIDE=false # RETURN=false
+  button_two = RETURN # RETURN=true
+}

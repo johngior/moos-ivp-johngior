@@ -1,0 +1,112 @@
+//-------------------------------------------------
+// NAME: Vehicle Community (Alpha)
+// FILE: vehicle.moos
+//-------------------------------------------------
+
+ServerHost = localhost
+ServerPort = 9001
+Community  = alpha
+
+// Forest Lake
+LatOrigin  = 43.825300 
+LongOrigin = -70.330400 
+
+// MIT Sailing Pavilion (use this one)
+// LatOrigin  = 42.358456 
+// LongOrigin = -71.087589
+
+//-------------------------------------------------
+// Antler configuration block
+ProcessConfig = ANTLER
+{
+  MSBetweenLaunches = 200
+
+  Run = MOOSDB          @ NewConsole = false
+  Run = uSimMarineV22      @ NewConsole = false
+  Run = pNodeReporter   @ NewConsole = false
+  Run = pMarinePIDV22     @ NewConsole = false
+  Run = pHelmIvP        @ NewConsole = false
+  Run = pShare          @ NewConsole = false
+}
+
+//-------------------------------------------------
+// pShare configuration block
+ProcessConfig = pShare
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  // Listen for incoming variables from the shoreside on port 9201
+  input = route = localhost:9201
+
+  // Route vehicle telemetry and visuals to the shoreside (listening on 9200)
+  output = src_name=NODE_REPORT_LOCAL, dest_name=NODE_REPORT, route=localhost:9200
+  output = src_name=VIEW_POLYGON, route=localhost:9200
+  output = src_name=VIEW_SEGLIST, route=localhost:9200
+  output = src_name=VIEW_POINT, route=localhost:9200
+  output = src_name=APPCAST, route=localhost:9200
+}
+
+//-------------------------------------------------
+// pHelmIvP configuration block
+ProcessConfig = pHelmIvP
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  behaviors  = alpha.bhv
+  domain     = course:0:359:360
+  domain     = speed:0:4:41
+}
+
+//-------------------------------------------------
+// pNodeReporter configuration block
+ProcessConfig = pNodeReporter
+{
+  AppTick    = 2
+  CommsTick  = 2
+
+  platform_type   = kayak
+  platform_length = 4
+}
+
+//-------------------------------------------------
+// uSimMarine configuration block
+ProcessConfig = uSimMarineV22
+{
+  AppTick    = 10
+  CommsTick  = 10
+
+  START_X       = 0
+  START_Y       = 0
+  START_SPEED   = 0
+  START_HEADING = 180
+  PREFIX        = NAV
+}
+
+//-------------------------------------------------
+// pMarinePID configuration block
+ProcessConfig = pMarinePIDV22
+{
+  AppTick    = 10
+  CommsTick  = 10
+
+  DEPTH_CONTROL = false
+  ACTIVE_START  = true
+  
+  // Yaw PID controller
+  YAW_PID_KP             = 1.2
+  YAW_PID_KD             = 0.0
+  YAW_PID_KI             = 0.3
+  YAW_PID_INTEGRAL_LIMIT = 0.07
+
+  // Speed PID controller
+  SPEED_PID_KP           = 1.0
+  SPEED_PID_KD           = 0.0
+  SPEED_PID_KI           = 0.0
+  SPEED_PID_INTEGRAL_LIMIT = 0.07
+
+  // Maximums
+  MAXRUDDER  = 100
+  MAXTHRUST  = 100
+}

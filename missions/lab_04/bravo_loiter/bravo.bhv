@@ -1,0 +1,60 @@
+//--------    FILE: alpha.bhv   -------------
+
+initialize   DEPLOY = false
+initialize   RETURN = false
+	
+//----------------------------------------------
+Behavior = BHV_Loiter
+{
+  name      = loiter
+  pwt       = 100
+  condition = DEPLOY = true
+  condition = RETURN = false
+  
+  // Utilize the duration parameter to complete after 150 seconds
+  duration  = 150
+  
+  // Post this endflag to trigger the return behavior
+  endflag   = RETURN = true
+
+  // Loiter parameters requested by the assignment
+  speed     = 2.5
+  clockwise = false
+  polygon   = format=radial, x=100, y=-75, radius=30, pts=8
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name      = waypt_return
+  pwt       = 100
+  condition = RETURN = true
+  condition = DEPLOY = true
+
+  speed     = 2.0
+  radius    = 2.0
+  point     = 0,0
+
+  // Optional: Turn off deploy and return flags when the vehicle arrives home
+  endflag   = RETURN = false
+  endflag   = DEPLOY = false
+}
+
+
+//----------------------------------------------
+Behavior=BHV_ConstantSpeed
+{
+  name      = const_speed
+  pwt       = 200
+  condition = SPD=true
+  condition = DEPLOY = true
+  //perpetual = true
+  updates   = SPEED_UPDATE
+  endflag   = SPD = false
+
+           speed = 0.5
+		    duration = 10
+	duration_reset = CONST_SPD_RESET=true
+	
+}
+
