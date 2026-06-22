@@ -9,6 +9,9 @@
 #define GenRescue_HEADER
 #include <vector>
 #include <string>
+#include <map>
+#include <string>
+#include "XYPoint.h"
 
 #include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
 
@@ -48,6 +51,16 @@ class GenRescue : public AppCastingMOOSApp
  bool   m_last_pt_received;
  bool   m_nav_received;
  int    m_pts_visited;
+
+ // ---> ADD THESE NEW VARIABLES FOR LAB 13 <---
+std::map<std::string, XYPoint> m_swimmers;
+bool m_path_needs_update;
+
+// Tracking variables for AppCasting
+double m_visit_radius;
+int    m_tot_pts_received;
+int    m_invalid_pts;
+int    m_pts_visited;
 };
 
 #endif 
