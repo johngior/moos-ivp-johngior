@@ -8,8 +8,8 @@
 #include <string>
 #include "MBUtils.h"
 #include "ColorParse.h"
-#include "GenPath.h"
-#include "GenPath_Info.h"
+#include "GenRescue.h"
+#include "GenRescue_Info.h"
 
 using namespace std;
 
@@ -40,12 +40,12 @@ int main(int argc, char *argv[])
     showHelpAndExit();
 
   cout << termColor("green");
-  cout << "pGenPath launching as " << run_command << endl;
+  cout << "pGenRescue launching as " << run_command << endl;
   cout << termColor() << endl;
 
-  GenPath GenPath;
+  GenRescue GenRescue;
 
-  GenPath.Run(run_command.c_str(), mission_file.c_str());
+  GenRescue.Run(run_command.c_str(), mission_file.c_str());
   
   return(0);
 }
