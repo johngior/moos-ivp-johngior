@@ -369,7 +369,7 @@ vector<Cluster> GenRescue::performKMeans(const vector<Swimmer>& swimmers, int k)
 //---------------------------------------------------------
 //---------------------------------------------------------
 // Procedure: postShortestPath()
-void GenRescue::postShortestPath()
+/*void GenRescue::postShortestPath()
 {
   if(!m_nav_x_set || !m_nav_y_set)
     return;
@@ -450,7 +450,7 @@ void GenRescue::postShortestPath()
 
   Notify("SURVEY_UPDATE", update_str);
   reportEvent("Hybrid route posted: " + update_str);
-}
+}*/
 
 //---------------------------------------------------------
 // Procedure: postNullPath()
@@ -479,6 +479,120 @@ void GenRescue::postNullPath()
   Notify(update_var, update_str);
   reportEvent("SURVEY_UPDATE=" + update_str);
 #endif
+}
+
+//---------------------------------------------------------
+// Procedure: postShortestPath() Advanced Adversarial Version
+void GenRescue::postShortestPath()
+{
+  if(!m_nav_x_set || !m_nav_y_set)
+    return;
+
+  vector<Swimmer> candidates;
+
+  for(const auto& entry : m_swimmers) {
+    if(!entry.second.found)
+      candidates.push_back(entry.second);
+  }
+
+  if(candidates.empty()) {
+    postNullPath();
+    return;
+  }
+
+  // Phase 1: Dynamic Voronoi Filter (Remove obvious losses)
+  vector<Swimmer> valid_swimmers;
+  if(m_enemy_report_set) {
+    for(const auto& s : candidates) {
+      double my_dist = pointDistance(m_nav_x, m_nav_y, s.x, s.y);
+      double enemy_dist = pointDistance(m_enemy_x, m_enemy_y, s.x, s.y);
+      
+      // Retain swimmer if we are closer, or if the enemy's lead is small (contestable)
+      if(my_dist < enemy_dist + 5.0) {
+        valid_swimmers.push_back(s);
+      }
+    }
+    // Safety fallback: if losing everywhere, keep all candidates so we don't stall
+    if(valid_swimmers.empty()) {
+      valid_swimmers = candidates;
+    }
+  } else {
+    valid_swimmers = candidates;
+  }
+
+  // Phase 2: K-Means Clustering
+  // Dynamically set k based on board density
+  int k = max(1, (int)(valid_swimmers.size() / 3));
+  vector<Cluster> clusters = performKMeans(valid_swimmers, k);
+
+  // Phase 3: Adversarial Cluster Selection (Predictive Utility)
+  vector<Swimmer> target_cluster;
+  double best_utility = -1.0;
+
+  for (const auto& c : clusters) {
+    if (c.members.empty()) continue;
+    
+    double dist_to_centroid = pointDistance(m_nav_x, m_nav_y, c.centroid_x, c.centroid_y);
+    
+    // Calculate a "winnable weight" for this cluster based on individual target racing
+    double winnable_weight = 0;
+    for (const auto& s : c.members) {
+      if (m_enemy_report_set) {
+        double my_target_dist = pointDistance(m_nav_x, m_nav_y, s.x, s.y);
+        double enemy_target_dist = pointDistance(m_enemy_x, m_enemy_y, s.x, s.y);
+        
+        if (my_target_dist < enemy_target_dist) {
+          winnable_weight += 2.0; // Clear win: We are closer to this specific swimmer
+        } else if (my_target_dist < enemy_target_dist + 5.0) {
+          winnable_weight += 0.5; // Contested: Enemy has a slight lead, but it's close
+        } // Else 0.0 (Conceded)
+      } else {
+        winnable_weight += 2.0;   // No enemy telemetry yet; all nodes are winnable
+      }
+    }
+
+    // Compute a cluster-wide speed/distance penalty factor
+    double competition_penalty = 1.0;
+    if (m_enemy_report_set) {
+      double enemy_dist_to_centroid = pointDistance(m_enemy_x, m_enemy_y, c.centroid_x, c.centroid_y);
+      
+      // If the opponent is closer to the center of this cluster than we are, penalize it
+      if (enemy_dist_to_centroid < dist_to_centroid) {
+        // Penalty scales linearly with how much closer the enemy is to the zone
+        competition_penalty += (dist_to_centroid - enemy_dist_to_centroid) * 0.2; 
+      }
+    }
+
+    // Complete Utility Function: High winnable weight penalized by travel time and enemy threat
+    double utility = winnable_weight / ((dist_to_centroid * competition_penalty) + 0.1);
+    
+    if (utility > best_utility) {
+      best_utility = utility;
+      target_cluster = c.members;
+    }
+  }
+
+  // Safety fallback
+  if (target_cluster.empty()) {
+    target_cluster = valid_swimmers;
+  }
+
+  // Phase 4: Local Route Generation using your existing 2-vertex lookahead
+  vector<Swimmer> route = buildLookAheadRoute(target_cluster, m_nav_x, m_nav_y);
+
+  // Phase 5: Post the updated path to the Helm
+  m_path = XYSegList();
+  m_path.set_label("rescue_route");
+
+  for(unsigned int i=0; i<route.size(); i++)
+    m_path.add_vertex(route[i].x, route[i].y);
+
+  Notify("VIEW_SEGLIST", m_path.get_spec());
+
+  string update_str = "points = " + m_path.get_spec_pts();
+
+  Notify("SURVEY_UPDATE", update_str);
+  reportEvent("Adversarial route posted: " + update_str);
 }
 
 
