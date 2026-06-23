@@ -1,5 +1,5 @@
 /************************************************************/
-/*    NAME: Alexios Vavvas                                              */
+/*    NAME: johngior                                              */
 /*    ORGN: MIT, Cambridge MA                               */
 /*    FILE: main.cpp, Cambridge MA                          */
 /*    DATE: December 29th, 1963                             */
@@ -8,8 +8,8 @@
 #include <string>
 #include "MBUtils.h"
 #include "ColorParse.h"
-#include "PointAssign.h"
-#include "PointAssign_Info.h"
+#include "GenRescue.h"
+#include "GenRescue_Info.h"
 
 using namespace std;
 
@@ -40,12 +40,12 @@ int main(int argc, char *argv[])
     showHelpAndExit();
 
   cout << termColor("green");
-  cout << "pPointAssign launching as " << run_command << endl;
+  cout << "pGenRescue launching as " << run_command << endl;
   cout << termColor() << endl;
 
-  PointAssign PointAssign;
+  GenRescue GenRescue;
 
-  PointAssign.Run(run_command.c_str(), mission_file.c_str());
+  GenRescue.Run(run_command.c_str(), mission_file.c_str());
   
   return(0);
 }

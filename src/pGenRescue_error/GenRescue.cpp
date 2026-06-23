@@ -21,8 +21,6 @@
 #include <algorithm>
 #include "NodeRecord.h"
 #include "NodeRecordUtils.h"
-#include "GenRescue.h"
-
 
 using namespace std;
 

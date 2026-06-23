@@ -21,8 +21,6 @@
 #include <algorithm>
 #include "NodeRecord.h"
 #include "NodeRecordUtils.h"
-#include "GenRescue.h"
-
 
 using namespace std;
 
@@ -159,7 +157,7 @@ bool GenRescue::OnConnectToServer()
 //---------------------------------------------------------
 // Procedure: Iterate()
 
-bool GenRescue::Iterate()
+/*bool GenRescue::Iterate()
 {
   AppCastingMOOSApp::Iterate();
   
@@ -167,6 +165,82 @@ bool GenRescue::Iterate()
   if(m_plan_pending && m_nav_x_set && m_nav_y_set) {
     postShortestPath();
     m_plan_pending = false;
+  }
+
+  AppCastingMOOSApp::PostReport();
+  return(true);
+}*/
+
+/*bool GenRescue::Iterate()
+{
+  AppCastingMOOSApp::Iterate();
+
+  // Re-plan if the swimmer list has changed
+  if(m_path_needs_update) {
+    
+    // EDGE CASE: If no swimmers are left, transition to return behavior
+    if(m_swimmers.empty()) {
+        Notify("RETURN", "true");
+        Notify("WPT_UPDATE", "points="); 
+    } 
+    else {
+        // NORMAL PATH PLANNING: 
+        // Iterate through m_swimmers, calculate the greedy path to formulate 
+        // a standard Waypoint behavior string (e.g. "points=x1,y1:x2,y2...")
+        // std::string my_points_string = ... 
+        
+        // Notify("WPT_UPDATE", my_points_string);
+    }
+    
+    // Reset the flag to wait for the next shore message
+    m_path_needs_update = false;
+  }
+
+  AppCastingMOOSApp::PostReport();
+  return(true);
+}*/
+
+bool GenRescue::Iterate()
+{
+  AppCastingMOOSApp::Iterate();
+
+  // Check if we need to recalculate the path based on new mail
+  if(m_path_needs_update) {
+    
+    // EDGE CASE: Are there any swimmers left?
+    if(m_swimmers.empty()) {
+        // Post RETURN=true to the MOOSDB to trigger the return behavior
+        Notify("RETURN", "true");
+        
+        // Clear the current waypoint path
+        Notify("WPT_UPDATE", "points="); 
+    } 
+    else {
+        // NORMAL PATH PLANNING: 
+        // Create an XYSegList to hold our dynamically generated route
+        XYSegList my_seglist;
+        
+        // Iterate through the active swimmers and add them to the route.
+        // (Note: This is a simple pass-through. To beat an adversary, you 
+        // should evaluate distance and order these points using a greedy 
+        // algorithm before adding them to the seglist).
+        std::map<std::string, XYPoint>::iterator p;
+        for(p = m_swimmers.begin(); p != m_swimmers.end(); p++) {
+            XYPoint swimmer_pt = p->second;
+            my_seglist.add_vertex(swimmer_pt.x(), swimmer_pt.y());
+        }
+
+        // Build your points string in the format expected by the helm
+        std::string update_str = "points = ";
+        update_str += my_seglist.get_spec();
+        
+        // Post it to the helm using the variable configured in the 
+        // 'updates' parameter of your Waypoint behavior
+        Notify("WPT_UPDATE", update_str);
+    }
+    
+    // Reset the flag so we don't recalculate again until the next message arrives
+    m_path_needs_update = false;
   }
 
   AppCastingMOOSApp::PostReport();

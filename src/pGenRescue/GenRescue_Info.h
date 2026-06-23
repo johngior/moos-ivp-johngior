@@ -1,12 +1,12 @@
 /****************************************************************/
-/*   NAME: johngior                                             */
-/*   ORGN: MIT, Cambridge MA                                    */
-/*   FILE: GenRescue_Info.h                                      */
-/*   DATE: Dececmber 29th, 1963                                 */
+/*   NAME: Mike Benjamin                                        */
+/*   ORGN: MIT Cambridge MA                                     */
+/*   FILE: GenRescue_Info.h                                     */
+/*   DATE: April 18th, 2022                                     */
 /****************************************************************/
 
-#ifndef GenRescue_INFO_HEADER
-#define GenRescue_INFO_HEADER
+#ifndef GEN_RESCUE_INFO_HEADER
+#define GEN_RESCUE_INFO_HEADER
 
 void showSynopsis();
 void showHelpAndExit();

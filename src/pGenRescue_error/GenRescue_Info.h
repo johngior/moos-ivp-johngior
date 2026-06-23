@@ -1,12 +1,12 @@
 /****************************************************************/
-/*   NAME: Alexios Vavvas                                             */
+/*   NAME: johngior                                             */
 /*   ORGN: MIT, Cambridge MA                                    */
-/*   FILE: PointAssign_Info.h                                      */
+/*   FILE: GenRescue_Info.h                                      */
 /*   DATE: Dececmber 29th, 1963                                 */
 /****************************************************************/
 
-#ifndef PointAssign_INFO_HEADER
-#define PointAssign_INFO_HEADER
+#ifndef GenRescue_INFO_HEADER
+#define GenRescue_INFO_HEADER
 
 void showSynopsis();
 void showHelpAndExit();

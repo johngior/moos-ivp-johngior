@@ -1,8 +1,8 @@
 /****************************************************************/
-/*   NAME: johngior                                             */
-/*   ORGN: MIT, Cambridge MA                                    */
-/*   FILE: GenRescue_Info.cpp                               */
-/*   DATE: December 29th, 1963                                  */
+/*   NAME: Mike Benjamin                                        */
+/*   ORGN: MIT Cambridge MA                                     */
+/*   FILE: GenRescue_Info.cpp                                   */
+/*   DATE: April 18th, 2022                                     */
 /****************************************************************/
 
 #include <cstdlib>
@@ -13,36 +13,35 @@
 
 using namespace std;
 
-//----------------------------------------------------------------
-// Procedure: showSynopsis
+//----------------------------------------------------------------                        
+// Procedure: showSynopsis                                                                
 
 void showSynopsis()
 {
   blk("SYNOPSIS:                                                       ");
   blk("------------------------------------                            ");
-  blk("  The pGenRescue application is used for               ");
-  blk("                                                                ");
+  blk("  A tool for                                                    ");
   blk("                                                                ");
   blk("                                                                ");
   blk("                                                                ");
 }
 
+
 //----------------------------------------------------------------
-// Procedure: showHelpAndExit
+// Procedure: showHelpAndExit()
 
 void showHelpAndExit()
 {
-  blk("                                                                ");
   blu("=============================================================== ");
-  blu("Usage: pGenRescue file.moos [OPTIONS]                   ");
+  blu("Usage: pGenRescue file.moos [OPTIONS]                           ");
   blu("=============================================================== ");
   blk("                                                                ");
   showSynopsis();
   blk("                                                                ");
   blk("Options:                                                        ");
   mag("  --alias","=<ProcessName>                                      ");
-  blk("      Launch pGenRescue with the given process name         ");
-  blk("      rather than pGenRescue.                           ");
+  blk("      Launch pGenRescue with the given process                  ");
+  blk("      name rather than pGenRescue.                              ");
   mag("  --example, -e                                                 ");
   blk("      Display example MOOS configuration block.                 ");
   mag("  --help, -h                                                    ");
@@ -50,7 +49,7 @@ void showHelpAndExit()
   mag("  --interface, -i                                               ");
   blk("      Display MOOS publications and subscriptions.              ");
   mag("  --version,-v                                                  ");
-  blk("      Display the release version of pGenRescue.        ");
+  blk("      Display the release version of pNodeReporter.             ");
   blk("                                                                ");
   blk("Note: If argv[2] does not otherwise match a known option,       ");
   blk("      then it will be interpreted as a run alias. This is       ");
@@ -60,56 +59,28 @@ void showHelpAndExit()
 }
 
 //----------------------------------------------------------------
-// Procedure: showExampleConfigAndExit
+// Procedure: showExampleConfigAndExit()
 
 void showExampleConfigAndExit()
 {
-  blk("                                                                ");
-  blu("=============================================================== ");
-  blu("pGenRescue Example MOOS Configuration                   ");
-  blu("=============================================================== ");
-  blk("                                                                ");
-  blk("ProcessConfig = pGenRescue                              ");
-  blk("{                                                               ");
-  blk("  AppTick   = 4                                                 ");
-  blk("  CommsTick = 4                                                 ");
-  blk("                                                                ");
-  blk("}                                                               ");
-  blk("                                                                ");
-  exit(0);
+  cout << "                                                   " << endl;
+  cout << "===================================================" << endl;
+  cout << "pGenRescue Example MOOS Configuration              " << endl;
+  cout << "===================================================" << endl;
+  cout << "                                                   " << endl;
+  cout << "ProcessConfig = pGenRescue                         " << endl;
+  cout << "{                                                  " << endl;
+  cout << "  AppTick   = 4                                    " << endl;
+  cout << "  CommsTick = 4                                    " << endl;
+  cout << "}                                                  " << endl;
 }
 
 
 //----------------------------------------------------------------
-// Procedure: showInterfaceAndExit
-
-void showInterfaceAndExit()
-{
-  blk("                                                                ");
-  blu("=============================================================== ");
-  blu("pGenRescue INTERFACE                                    ");
-  blu("=============================================================== ");
-  blk("                                                                ");
-  showSynopsis();
-  blk("                                                                ");
-  blk("SUBSCRIPTIONS:                                                  ");
-  blk("------------------------------------                            ");
-  blk("  NODE_MESSAGE = src_node=alpha,dest_node=bravo,var_name=FOO,   ");
-  blk("                 string_val=BAR                                 ");
-  blk("                                                                ");
-  blk("PUBLICATIONS:                                                   ");
-  blk("------------------------------------                            ");
-  blk("  Publications are determined by the node message content.      ");
-  blk("                                                                ");
-  exit(0);
-}
-
-//----------------------------------------------------------------
-// Procedure: showReleaseInfoAndExit
+// Procedure: showReleaseInfoAndExit()
 
 void showReleaseInfoAndExit()
 {
   showReleaseInfo("pGenRescue", "gpl");
   exit(0);
 }
-

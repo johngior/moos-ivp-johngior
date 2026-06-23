@@ -1,0 +1,66 @@
+/************************************************************/
+/*    NAME: johngior                                              */
+/*    ORGN: MIT, Cambridge MA                               */
+/*    FILE: GenRescue.h                                          */
+/*    DATE: December 29th, 1963                             */
+/************************************************************/
+
+#ifndef GenRescue_HEADER
+#define GenRescue_HEADER
+#include <vector>
+#include <string>
+#include <map>
+#include <string>
+#include "XYPoint.h"
+
+#include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
+
+class GenRescue : public AppCastingMOOSApp
+{
+ public:
+   GenRescue();
+   ~GenRescue();
+
+ protected: // Standard MOOSApp functions to overload  
+   bool OnNewMail(MOOSMSG_LIST &NewMail);
+   bool Iterate();
+   bool OnConnectToServer();
+   bool OnStartUp();
+
+ protected: // Standard AppCastingMOOSApp function to overload 
+   bool buildReport();
+
+ protected:
+   void registerVariables();
+
+ private: // Configuration variables
+
+ private: // State variables
+ // State variables for ownship position
+ double m_nav_x;
+ double m_nav_y;
+
+ // State variables for visit points
+ std::vector<std::string> m_visit_points;
+ bool m_points_ready;
+ // Tracking variables for AppCasting
+ double m_visit_radius;
+ int    m_tot_pts_received;
+ int    m_invalid_pts;
+ bool   m_first_pt_received;
+ bool   m_last_pt_received;
+ bool   m_nav_received;
+ int    m_pts_visited;
+
+ // ---> ADD THESE NEW VARIABLES FOR LAB 13 <---
+std::map<std::string, XYPoint> m_swimmers;
+bool m_path_needs_update;
+
+// Tracking variables for AppCasting
+double m_visit_radius;
+int    m_tot_pts_received;
+int    m_invalid_pts;
+int    m_pts_visited;
+};
+
+#endif 

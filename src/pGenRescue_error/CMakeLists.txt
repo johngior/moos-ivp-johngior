@@ -1,18 +1,21 @@
 #--------------------------------------------------------
-# The CMakeLists.txt for:                      pGenRescue
-# Author(s):                                Mike Benjamin
+# The CMakeLists.txt for:                       pGenPath
+# Author(s):                              johngior
 #--------------------------------------------------------
 
-FILE(GLOB SRC *.cpp)
+SET(SRC
+  GenRescue.cpp
+  GenRescue_Info.cpp
+  main.cpp
+)
 
 ADD_EXECUTABLE(pGenRescue ${SRC})
 
 TARGET_LINK_LIBRARIES(pGenRescue
    ${MOOS_LIBRARIES}
-   contacts
    geometry
    apputil
-   mbutil  
+   mbutil
    m
    pthread)
 
