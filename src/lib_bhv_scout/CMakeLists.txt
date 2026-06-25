@@ -11,10 +11,11 @@ TARGET_LINK_LIBRARIES(BHV_Scout
    behaviors 
    ivpbuild 
    logic 
-   ivpcore 
+   ivpcore
+   geometry
+   contacts 
    bhvutil 
-   mbutil 
-   geometry 
+   mbutil  
 )
 
 
