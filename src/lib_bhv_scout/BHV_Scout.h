@@ -48,18 +48,25 @@ protected:
 protected: // State variables
   double   m_osx;
   double   m_osy;
+  double   m_osh;
   double   m_curr_time;
 
   double   m_ptx;
   double   m_pty;
   bool     m_pt_set;
+  double m_momentum_weight;
 
   XYPolygon m_rescue_region;
   std::vector<XYPoint> m_known_swimmers; // Add this vector
 
+  std::vector<XYPoint> m_spiral_path; // ADD THIS: Holds the red line route
+  unsigned int m_path_index;          // ADD THIS: Tracks which point we are on
+
 protected: // Config variables
   double m_capture_radius;
   double m_desired_speed;
+  double m_anti_cluster_radius; // Renamed from edge_buffer for clarity
+  double m_edge_buffer;
 
   std::string m_tmate;
 };

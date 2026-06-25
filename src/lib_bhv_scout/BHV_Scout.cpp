@@ -29,39 +29,43 @@ BHV_Scout::BHV_Scout(IvPDomain gdomain) :
   // Default values for behavior state variables
   m_osx  = 0;
   m_osy  = 0;
+  m_osh  = 0;
 
   // All distances are in meters, all speed in meters per second
   // Default values for configuration parameters 
   m_desired_speed  = 1; 
   m_capture_radius = 10;
+  m_anti_cluster_radius = 20.0;
+  m_edge_buffer    = 25.0; // Distance inward from the main boundary (your red area)
+  //m_momentum_weight = 1.5; // Default: subtracts 1.5 meters from the "score" for every 1 degree of turn
 
   m_pt_set = false;
+  m_path_index = 0; // ADD THIS
+
+  m_anti_cluster_radius = 20.0; // Distance to maintain from known clusters
   
   addInfoVars("NAV_X, NAV_Y");
   addInfoVars("RESCUE_REGION");
   addInfoVars("SCOUTED_SWIMMER");
 }
 
-//---------------------------------------------------------------
-// Procedure: setParam() - handle behavior configuration parameters
-
 bool BHV_Scout::setParam(string param, string val) 
 {
-  // Convert the parameter to lower case for more general matching
   param = tolower(param);
-  
   bool handled = true;
+  
   if(param == "capture_radius")
     handled = setPosDoubleOnString(m_capture_radius, val);
   else if(param == "desired_speed")
     handled = setPosDoubleOnString(m_desired_speed, val);
+  else if(param == "edge_buffer") // ADD THIS
+    handled = setPosDoubleOnString(m_edge_buffer, val);
   else if(param == "tmate")
     handled = setNonWhiteVarOnString(m_tmate, val);
   else
     handled = false;
 
   srand(time(NULL));
-  
   return(handled);
 }
 
@@ -126,8 +130,10 @@ IvPFunction *BHV_Scout::onRunState()
   bool ok1, ok2;
   m_osx = getBufferDoubleVal("NAV_X", ok1);
   m_osy = getBufferDoubleVal("NAV_Y", ok2);
-  if(!ok1 || !ok2) {
-    postWMessage("No ownship X/Y info in info_buffer.");
+  bool ok3;
+  m_osh = getBufferDoubleVal("NAV_HEADING", ok3); // GET HEADING
+  if(!ok1 || !ok2 || !ok3) {
+    postWMessage("No ownship X/Y/HDG info in info_buffer.");
     return(0);
   }
   
@@ -155,7 +161,6 @@ IvPFunction *BHV_Scout::onRunState()
 }
 
 //-----------------------------------------------------------
-//-----------------------------------------------------------
 // Procedure: updateScoutPoint()
 
 void BHV_Scout::updateScoutPoint()
@@ -164,23 +169,18 @@ void BHV_Scout::updateScoutPoint()
     return;
 
   string region_str = getBufferStringVal("RESCUE_REGION");
-  if(region_str == "")
+  if(region_str == "") {
     postWMessage("Unknown RESCUE_REGION");
-  else
-    postRetractWMessage("Unknown RESCUE_REGION");
-
-  XYPolygon region = string2Poly(region_str);
-  if(!region.is_convex()) {
+    return;
+  }
+  
+  m_rescue_region = string2Poly(region_str);
+  if(!m_rescue_region.is_convex()) {
     postWMessage("Badly formed RESCUE_REGION");
     return;
   }
-  m_rescue_region = region;
   
-  // Anti-clustering: Best-of-N Candidate Generation
-  int num_candidates = 50; 
-  double best_ptx = 0;
-  double best_pty = 0;
-  double max_min_dist = -1;
+  int num_candidates = 500; // High number to guarantee it finds a point inside the red zone
   bool found_valid = false;
 
   for(int i = 0; i < num_candidates; i++) {
@@ -189,40 +189,37 @@ void BHV_Scout::updateScoutPoint()
     bool ok = randPointInPoly(m_rescue_region, ptx, pty);
     
     if(ok) {
-      found_valid = true;
+      // Check distance to the outer polygon walls
+      double min_dist_to_edge = -1;
+      unsigned int num_vertices = m_rescue_region.size(); 
       
-      // If we haven't found any swimmers yet, just take the first random point
-      if(m_known_swimmers.empty()) {
-        best_ptx = ptx;
-        best_pty = pty;
-        break; 
-      }
-
-      // Calculate distance from this candidate point to the NEAREST known swimmer
-      double min_dist_to_swimmer = -1;
-      for(unsigned int j = 0; j < m_known_swimmers.size(); j++) {
-        double dist = hypot(ptx - m_known_swimmers[j].x(), pty - m_known_swimmers[j].y());
-        if(min_dist_to_swimmer < 0 || dist < min_dist_to_swimmer) {
-          min_dist_to_swimmer = dist;
+      for(unsigned int v = 0; v < num_vertices; v++) {
+        double x1 = m_rescue_region.get_vx(v);
+        double y1 = m_rescue_region.get_vy(v);
+        double x2 = m_rescue_region.get_vx((v + 1) % num_vertices);
+        double y2 = m_rescue_region.get_vy((v + 1) % num_vertices);
+        
+        double dist = distPointToSeg(ptx, pty, x1, y1, x2, y2);
+        if(min_dist_to_edge < 0 || dist < min_dist_to_edge) {
+          min_dist_to_edge = dist;
         }
       }
-
-      // We want the candidate point that maximizes this minimum distance
-      if(min_dist_to_swimmer > max_min_dist) {
-        max_min_dist = min_dist_to_swimmer;
-        best_ptx = ptx;
-        best_pty = pty;
+      
+      // Is this random point safely inside your red area?
+      if(min_dist_to_edge >= m_edge_buffer) {
+        m_ptx = ptx;
+        m_pty = pty;
+        found_valid = true;
+        break; // We found a good point, stop looking!
       }
     }
   }
 
   if(!found_valid) {
-    postWMessage("Unable to generate scout point");
+    postWMessage("Unable to generate scout point inside the red area");
     return;
   }
     
-  m_ptx = best_ptx;
-  m_pty = best_pty;
   m_pt_set = true;
   string msg = "New pt: " + doubleToStringX(m_ptx) + "," + doubleToStringX(m_pty);
   postEventMessage(msg);

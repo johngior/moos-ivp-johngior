@@ -24,6 +24,12 @@ struct Swimmer
   bool found;
 };
 
+struct Cluster {
+  double centroid_x;
+  double centroid_y;
+  std::vector<Swimmer> members;
+};
+
 class GenRescue : public AppCastingMOOSApp
 {
  public:
@@ -45,6 +51,7 @@ class GenRescue : public AppCastingMOOSApp
   bool handleMailRescueRegion(std::string);
   void postShortestPath();
   void postNullPath();
+  std::vector<Cluster> performKMeans(const std::vector<Swimmer>& swimmers, int k);
 
  private: // Config variables
   std::string m_vname;
